@@ -1,0 +1,14 @@
+*{
+  box-sizing: border-box;
+}
+
+a{
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+body{
+  padding: 0;
+  margin: 0;
+}
