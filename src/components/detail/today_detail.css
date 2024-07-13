@@ -1,0 +1,23 @@
+.todaydetail-container{
+    display:flex;
+    gap:3rem;
+}
+
+.todaydetail-item{
+    display: flex;            
+    flex-direction: column;   
+    justify-content: space-between; 
+    align-items: center;     
+    gap: 0.5rem;            
+    font-size: 0.75rem;   
+    font-weight: 600;       
+    color: rgba(0, 0, 0, 0.8); 
+}
+
+.todaydetail-info-text{
+    white-space: nowrap;
+}
+
+.todaydetail-icon-size{
+    font-size:1.875rem;
+}

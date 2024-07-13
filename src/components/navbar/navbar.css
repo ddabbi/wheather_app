@@ -1,5 +1,66 @@
-.navbar-logo-icon{
-    font-size: 30px;
-    color: yellow;
+/* navbar.css */
+.navbar-container {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    background-color: white;
+}
+
+.navbar-inner {
+    height: 80px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 80rem; /* 1280px */
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.navbar-heading {
+    color: #6b7280;
+    font-size: 1.875rem; /* 30px */
+    line-height: 2.25rem; /* 36px */
+}
+
+.navbar-logo-icon {
+    font-size: 1.875rem; /* 30px */
     margin-top: 0.25rem;
+color: #fcd34d;
+}
+
+.navbar-container .navbar-section{
+    display: flex;
+    gap: 0.5rem; /* 8px */
+    align-items: center;
+}
+
+.navbar-container .position-icon{
+    font-size: 2rem; /* 32px */
+    color: #9ca3af; /* gray-400 */
+    cursor: pointer;
+}
+
+.navbar-container .position-icon:hover{
+    opacity: 0.8;
+}
+
+.navbar-container .location-icon{
+    font-size: 2.5rem; /* 40px */
+}
+
+.navbar-container .location-text{
+    color: rgba(30, 41, 59, 0.8); /* slate-900/80 */
+    font-size: 0.875rem; /* 14px */
 }
