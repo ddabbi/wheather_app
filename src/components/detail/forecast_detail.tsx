@@ -41,11 +41,10 @@ export default function ForecastDetail(props : ForcastDetailProps){
                     <p style={{fontSize: '1rem'}}>{day}</p>
                 </div>
                 <div className='additional-info'>
-                    <span>{`${convertKelvinToCelsius(temp ?? 273.19)}℃`}</span>
-                    <span>{description}</span>
+                    <span>{`${convertKelvinToCelsius(temp ?? 273.15)}℃`}</span>
                     <p className='additional-para'>
                         <span>체감온도</span>
-                        <span>{`${convertKelvinToCelsius(feels_like ?? 273.19)}℃`}</span>
+                        <span>{`${convertKelvinToCelsius(feels_like ?? 273.15)}℃`}</span>
                     </p>
                     <p style={{textTransform: "capitalize", fontSize: '1rem'}}>{description}</p>
                 </div>

@@ -74,4 +74,3 @@ export default function Navbar(props : Props){
 
 
 // key Name : nextjs / permissions = ALL
-// secret key 백업 : sk-proj-gOmHhrmlYjj8HAlSiv8hT3BlbkFJugixYD3qKaRZDc50kxQF
