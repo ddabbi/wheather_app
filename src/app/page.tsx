@@ -11,6 +11,10 @@ import WeatherIcon from "@/components/weathericon/weathericon";
 import ForecastDetail from "@/components/detail/forecast_detail";
 import TodayDetail from "@/components/detail/today_detail";
 import { convertKelvinToCelsius } from "@/utils/convertKelvinToClesius";
+import { convertMetersToKilomters } from "@/utils/convertMetersToKilometers";
+import { convertWindSpeed } from "@/utils/convertWindSpeed";
+import { fromUnixTime, format, parseISO } from "date-fns";
+import Gpt from "@/components/gpt/gpt";
 
 export default function Home() {
 
@@ -18,9 +22,54 @@ export default function Home() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<String | null>(null);
+  const [answer, setAnswer] = useState('');
+
 
   // 있는 지역인지 검사
-  const location : string[] = ['seoul', 'incheon']
+  const location: string[] = [
+    // United States
+    'new york', 'los angeles', 'chicago', 'houston', 'phoenix', 'philadelphia', 'san antonio', 'san diego', 'dallas', 'san jose', 'austin', 'jacksonville', 'fort worth', 'columbus', 'charlotte', 'san francisco', 'indianapolis', 'seattle', 'denver', 'washington',
+    // United Kingdom
+    'london', 'birmingham', 'leeds', 'glasgow', 'sheffield', 'manchester', 'liverpool', 'bristol', 'newcastle', 'nottingham', 'southampton', 'portsmouth', 'plymouth', 'brighton', 'leicester', 'edinburgh', 'cardiff', 'belfast', 'stoke-on-trent', 'coventry',
+    // France
+    'paris', 'marseille', 'lyon', 'toulouse', 'nice', 'nantes', 'strasbourg', 'montpellier', 'bordeaux', 'lille', 'rennes', 'reims', 'le havre', 'saint-étienne', 'toulon', 'angers', 'grenoble', 'dijon', 'nîmes', 'aix-en-provence',
+    // Japan
+    'tokyo', 'yokohama', 'osaka', 'nagoya', 'sapporo', 'kobe', 'kyoto', 'fukuoka', 'kawasaki', 'hiroshima', 'sendai', 'kitakyushu', 'chiba', 'sakai', 'niigata', 'hamamatsu', 'shizuoka', 'sagamihara', 'okayama', 'kumamoto',
+    // South Korea
+    'seoul', 'busan', 'incheon', 'daegu', 'daejeon', 'gwangju', 'suwon', 'ulsan', 'changwon', 'goyang', 'yongin', 'seongnam', 'cheongju', 'jeonju', 'cheonan', 'ansan', 'jeju', 'hwaseong', 'gimhae', 'pohang', 'jinju', 'gyeongju', 'mokpo', 'suncheon', 'chuncheon', 'wonju', 'gumi', 'iksan', 'andong', 'yangsan', 'gunsan', 'gwangmyeong', 'asan', 'pyeongtaek', 'siheung', 'paju', 'gimpo', 'uijeongbu', 'donghae', 'gangneung',
+    // China
+    'beijing', 'shanghai', 'guangzhou', 'shenzhen', 'chengdu', 'wuhan', 'tianjin', 'hangzhou', 'chongqing', 'nanjing', 'shenyang', 'xi\'an', 'harbin', 'suzhou', 'qingdao', 'dalian', 'zhengzhou', 'jinan', 'changsha', 'kunming', 'fuzhou', 'changchun', 'nanning', 'hefei', 'shijiazhuang', 'guiyang', 'ningbo', 'taiyuan', 'xiamen', 'urumqi', 'shijiazhuang', 'lanzhou', 'haikou', 'sanya',
+    // India
+    'mumbai', 'delhi', 'bangalore', 'hyderabad', 'ahmedabad', 'chennai', 'kolkata', 'surat', 'pune', 'jaipur', 'lucknow', 'kanpur', 'nagpur', 'visakhapatnam', 'indore', 'thane', 'bhopal', 'patna', 'vadodara', 'ghaziabad', 'ludhiana', 'agra', 'nashik', 'ranchi', 'faridabad', 'meerut', 'rajkot', 'kalyan-dombivli', 'vasai-virar', 'varanasi', 'srinagar', 'aurangabad', 'dhanbad', 'amritsar', 'navi mumbai', 'allahabad', 'howrah', 'gwalior', 'jabalpur',
+    // Russia
+    'moscow', 'saint petersburg', 'novosibirsk', 'yekaterinburg', 'nizhny novgorod', 'kazan', 'chelyabinsk', 'omsk', 'samara', 'rostov-on-don', 'ufa', 'krasnoyarsk', 'voronezh', 'perm', 'volgograd', 'krasnodar', 'saratov', 'tyumen', 'tolyatti', 'izhevsk', 'barnaul', 'ulyanovsk', 'irkutsk', 'khabarovsk', 'yaroslavl', 'vladivostok', 'makhachkala', 'tomsk', 'orenburg', 'kemerovo', 'novokuznetsk', 'ryazan', 'astrakhan', 'penza', 'lipetsk', 'kirov', 'cheboksary', 'kaliningrad', 'bryansk',
+    // Australia
+    'sydney', 'melbourne', 'brisbane', 'perth', 'adelaide', 'gold coast', 'canberra', 'newcastle', 'wollongong', 'logan city', 'geelong', 'hobart', 'townsville', 'cairns', 'toowoomba', 'darwin', 'ballarat', 'bendigo', 'launceston', 'mackay', 'rockhampton', 'bunbury', 'bundaberg', 'hervey bay', 'maitland',
+    // Germany
+    'berlin', 'hamburg', 'munich', 'cologne', 'frankfurt', 'stuttgart', 'düsseldorf', 'dortmund', 'essen', 'leipzig', 'bremen', 'dresden', 'hanover', 'nuremberg', 'duisburg', 'bochum', 'wuppertal', 'bielefeld', 'bonn', 'münster', 'karlsruhe', 'mannheim', 'augsburg', 'wiesbaden', 'gelsenkirchen', 'mönchengladbach', 'braunschweig', 'chemnitz', 'aachen', 'kiel', 'halle', 'magdeburg', 'krefeld', 'freiburg', 'lübeck', 'oberhausen', 'erfurt', 'mainz', 'rostock', 'kassel',
+    // Italy
+    'rome', 'milan', 'naples', 'turin', 'palermo', 'genoa', 'bologna', 'florence', 'catania', 'bari', 'venice', 'verona', 'messina', 'padua', 'trieste', 'brescia', 'taranto', 'parma', 'prato', 'modena', 'reggio calabria', 'reggio emilia', 'perugia', 'livorno', 'ravenna', 'cagliari', 'foggia', 'rimini', 'salerno', 'ferrara',
+    // Spain
+    'madrid', 'barcelona', 'valencia', 'seville', 'zaragoza', 'málaga', 'murcia', 'palma', 'las palmas', 'bilbao', 'alicante', 'córdoba', 'valladolid', 'vigo', 'gijón', 'hospitalet de llobregat', 'vitoria-gasteiz', 'granada', 'elche', 'oviedo', 'badalona', 'cartagena', 'terrassa', 'jerez de la frontera', 'sabadell', 'móstoles', 'santa cruz de tenerife', 'alcalá de henares', 'pamplona', 'fuenlabrada', 'almería', 'leganés', 'san sebastián', 'burgos', 'santander', 'castellón de la plana', 'getafe', 'alcorcón', 'albacete',
+    // Canada
+    'toronto', 'montreal', 'vancouver', 'calgary', 'edmonton', 'ottawa', 'winnipeg', 'quebec city', 'hamilton', 'kitchener', 'london', 'victoria', 'halifax', 'oshawa', 'windsor', 'saskatoon', 'regina', 'st. john\'s', 'barrie', 'kelowna', 'abbotsford', 'sherbrooke', 'sudbury', 'kingston', 'saguenay', 'trois-rivières', 'guelph', 'moncton', 'brantford', 'saint john', 'thunder bay', 'charlottetown', 'red deer', 'lethbridge', 'kamloops', 'nanaimo', 'fredericton', 'saint-jérôme', 'peterborough',
+    // Brazil
+    'são paulo', 'rio de janeiro', 'brasília', 'salvador', 'fortaleza', 'belo horizonte', 'manaus', 'curitiba', 'recife', 'goiânia', 'belém', 'porto alegre', 'guarulhos', 'campinas', 'são luís', 'são gonçalo', 'maceió', 'duque de caxias', 'natal', 'teresina', 'nova iguaçu', 'são bernardo do campo', 'campo grande', 'joão pessoa', 'ribeirão preto', 'jaboatão dos guararapes', 'contagem', 'aracaju', 'feira de santana', 'sorocaba', 'londrina', 'juiz de fora', 'joinville', 'ananindeua', 'uberlândia', 'pelotas', 'blumenau', 'niterói', 'macapá',
+    // South Africa
+    'cape town', 'johannesburg', 'durban', 'pretoria', 'port elizabeth', 'bloemfontein', 'east london', 'nelspruit', 'kimberley', 'polokwane', 'pietermaritzburg', 'vereeniging', 'welkom', 'klerksdorp', 'george', 'witbank', 'potchefstroom', 'rustenburg', 'bethlehem', 'grahamstown', 'stellenbosch', 'rustenburg', 'sasolburg', 'newcastle', 'kroonstad', 'phalaborwa', 'carletonville', 'vryheid', 'kuruman', 'kathu',
+    // Egypt
+    'cairo', 'alexandria', 'giza', 'shubra el kheima', 'port said', 'suez', 'luxor', 'mansoura', 'tanta', 'asyut', 'ismailia', 'faiyum', 'zagazig', 'damietta', 'aswan', 'minya', 'beni suef', 'qena', 'sohag', 'shibin el kom', 'banha', 'arish', 'mallawi', '10th of ramadan city', 'bilqas', 'el quseir', 'hurghada', 'borg el arab', 'matruh', 'el kharga',
+    // Turkey
+    'istanbul', 'ankara', 'izmir', 'bursa', 'adana', 'gaziantep', 'konya', 'antalya', 'kayseri', 'mersin', 'eskisehir', 'diyarbakir', 'samsun', 'denizli', 'sanliurfa', 'adapazari', 'malatya', 'kahramanmaras', 'erzurum', 'van', 'batman', 'elazig', 'izmit', 'afyonkarahisar', 'tekirdag', 'trabzon', 'ordu', 'sivas', 'usak', 'aydin',
+    // Argentina
+    'buenos aires', 'córdoba', 'rosario', 'mendoza', 'la plata', 'san miguel de tucumán', 'mar del plata', 'salta', 'santa fe', 'san juan', 'resistencia', 'santiago del estero', 'corrientes', 'bahía blanca', 'paraná', 'neuquén', 'formosa', 'san luis', 'san salvador de jujuy', 'santa rosa', 'catamarca', 'río gallegos', 'comodoro rivadavia', 'posadas', 'rafaela', 'san fernando del valle de catamarca', 'la rioja', 'san carlos de bariloche', 'tandil', 'villa maría',
+    // Mexico
+    'mexico city', 'guadalajara', 'monterrey', 'puebla', 'tijuana', 'león', 'ciudad juárez', 'zapopan', 'monterrey', 'mérida', 'cancún', 'querétaro', 'morelia', 'aguascalientes', 'hermosillo', 'saltillo', 'culiacán', 'chihuahua', 'san luis potosí', 'torreón', 'veracruz', 'villahermosa', 'xalapa', 'irapuato', 'mazatlán', 'durango', 'cuernavaca', 'celaya', 'matamoros', 'nuevo laredo',
+    // Indonesia
+    'jakarta', 'surabaya', 'bandung', 'medan', 'bekasi', 'tangerang', 'depok', 'semarang', 'palembang', 'makassar', 'batam', 'pekanbaru', 'bogor', 'bandar lampung', 'malang', 'padang', 'denpasar', 'samarinda', 'tasikmalaya', 'banjarmasin', 'balikpapan', 'jambi city', 'surakarta', 'manado', 'yogyakarta', 'mataram', 'kupang', 'cilegon', 'kendari', 'bengkulu',
+    // Thailand
+    'bangkok', 'nonthaburi', 'nakhon ratchasima', 'chiang mai', 'hat yai', 'udon thani', 'pak kret', 'khon kaen', 'ubon ratchathani', 'nakhon si thammarat', 'songkhla', 'surat thani', 'phitsanulok', 'pattaya', 'lampang', 'trang', 'rayong', 'chiang rai', 'nakhon sawan', 'phuket'
+  ];
 
   const fetchWeatherData = async ()=>{
     setIsLoading(true);
@@ -130,24 +179,28 @@ export default function Home() {
             </ListBox>
           </div>
 
-          <div>
+          <div className={styles.todaySecondBox}>
               <ListBox className="box-style3">
-                <p>
+                <p className={styles.todaySecondeTitle}>
                   {todayData?.weather[0].description}
                 </p>
                 <WeatherIcon iconName={todayData?.weather[0].icon ?? ""}/>
               </ListBox>
               <ListBox className="box-style4">
                 <TodayDetail
-                  visibility={`${todayData?.visibility}`}
+                  visibility={convertMetersToKilomters(todayData?.visibility ?? 10000)}
                   humidity={`${todayData?.main.humidity}`}
-                  windSpeed={`${todayData?.wind.speed}`}
-                  airPressure={`${todayData?.main.pressure}`}
-                  sunrise={`${data?.city.sunrise}`}
-                  sunset={`${data?.city.sunset}`}
+                  windSpeed={convertWindSpeed(todayData?.wind.speed ?? 0.0)}
+                  airPressure={`${todayData?.main.pressure}hPa`}
+                  sunrise={format(fromUnixTime(data?.city.sunrise ?? 0), "H:mm")}
+                  sunset={format(fromUnixTime(data?.city.sunset ?? 0), "H:mm")}
                 />
               </ListBox>
           </div>
+        </section>
+
+        <section>
+          <h2><Gpt answer={answer} setAnswer={setAnswer}></Gpt></h2>
         </section>
 
         {/* 일기예보(주간) */}
@@ -156,10 +209,37 @@ export default function Home() {
             {
               filteredList && filteredList.map((item, index)=> {
                 return(
-                  <ForecastDetail key={index}/>
+                  <ForecastDetail key={index} 
+                    weatherIcon={item.weather[0].icon ?? ""} 
+                    date={format(parseISO(item.dt_txt ?? ""), "MM월 dd일")} 
+                    day={format(parseISO(item.dt_txt ?? ""), "EEEE")} 
+                    temp={item.main.temp ?? 0} 
+                    feels_like={item.main.feels_like ?? 0} 
+                    temp_min={item.main.temp_min ?? 0} 
+                    temp_max={item.main.temp_max ?? 0} 
+                    description={item.weather[0].icon ?? ""}
+                    visibility={convertMetersToKilomters(item?.visibility ?? 10000)}
+                    humidity={`${item?.main.humidity}`}
+                    windSpeed={convertWindSpeed(item?.wind.speed ?? 0.0)}
+                    airPressure={`${item?.main.pressure}hPa`}
+                    sunrise={format(fromUnixTime(data?.city.sunrise ?? 0), "H:mm")}
+                    sunset={format(fromUnixTime(data?.city.sunset ?? 0), "H:mm")}/>
                 )
               })
             }
+        </section>
+
+        <section className={styles.boardSectionGrid}>
+          <h2>도시 검색어 안내</h2> 
+          <div className={styles.searchBoard}>
+            {
+              location.map((item, index)=>{
+                return(
+                  <p key={index}>{item}</p>
+                )
+              })
+            }
+          </div>
         </section>
       </main>
     </div>

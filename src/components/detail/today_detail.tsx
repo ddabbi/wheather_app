@@ -23,7 +23,7 @@ export interface SingleWeatherDetailProps{
 export default function TodayDetail(props : TodayDetailProps){
     return(
         <>
-            <SingleWeatherDetail information='가기성' icon={<LuEye/>} value={props.visibility} />
+            <SingleWeatherDetail information='가시성' icon={<LuEye/>} value={props.visibility} />
 
             <SingleWeatherDetail information='습도' icon={<FiDroplet/>} value={props.humidity} />
 

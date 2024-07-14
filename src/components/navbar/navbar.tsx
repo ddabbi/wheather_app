@@ -56,6 +56,13 @@ export default function Navbar(props : Props){
                     <div style={{position: 'relative'}}>
                         {/* 입력창 */}
                         <SearchBox searchValue={city} onChange={(e)=>handleInputChange(e.target.value)} onSubmit={handleSubmitSearch}/>
+                        {
+                            error && (
+                                <p style={{color: 'red'}}>
+                                    {error}
+                                </p>
+                            )
+                        }
                     </div>
                 </section>
             
@@ -66,3 +73,7 @@ export default function Navbar(props : Props){
 
 // 리액트 아이콘
 // npm install react-icons --save
+
+
+// key Name : nextjs / permissions = ALL
+// secret key 백업 : sk-proj-gOmHhrmlYjj8HAlSiv8hT3BlbkFJugixYD3qKaRZDc50kxQF
